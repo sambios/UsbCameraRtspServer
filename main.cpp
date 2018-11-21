@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 #ifdef _WIN32
     server.SetH264File("c:\\hsyuan\\testfiles\\yanxi-1080p.264");
 #else
-    server.SetH264File("/home/huaishan.yuan/yanxi-1080p.264");
+    server.SetH264File("/home/hsyuan/testfiles/yanxi-720-2m.264");
 #endif 
     server.StartServer();
     

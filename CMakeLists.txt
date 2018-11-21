@@ -11,24 +11,28 @@ add_definitions(-D__STDC_CONSTANT_MACROS -std=c++11)
 #message(STATUS "   Include:${Ffmpeg_INCLUDE_DIRS}")
 message(STATUS "Home is $ENV{HOME}")
 
-#set(Live555_ROOT /mnt/hgfs/hsyuan/third-party/live.2018.09.18)
-set(Live555_ROOT $ENV{HOME}/third_party/live)
+set(THIRD_PARTY_ROOT /home/hsyuan/work/third_party)
+set(Live555_ROOT ${THIRD_PARTY_ROOT}/live555)
+
+if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+	set(LIB_ARCH_NAME x64-ubuntu18-gcc)
+	set(IS_LINUX 1)
+elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+	set(LIB_ARCH_NAME mac)
+	set(IS_MAC 1)
+endif()
+
 
 include_directories(${Live555_ROOT}/BasicUsageEnvironment/include
     ${Live555_ROOT}/UsageEnvironment/include
 	${Live555_ROOT}/liveMedia/include
 	${Live555_ROOT}/groupsock/include
-	/usr/include/x86_64-linux-gnu
        )
 
 #link_libraries( ${OpenCV})
 
 link_directories(
-    ${Live555_ROOT}/groupsock
-    ${Live555_ROOT}/UsageEnvironment
-	${Live555_ROOT}/BasicUsageEnvironment
-	${Live555_ROOT}/liveMedia
-    /usr/local/lib
+	${Live555_ROOT}/${LIB_ARCH_NAME}/lib
 	)
 
 add_executable(ffmpegH264RtspServer
@@ -46,12 +50,12 @@ target_link_libraries(ffmpegH264RtspServer
 	BasicUsageEnvironment
 	UsageEnvironment
 	groupsock
-	avcodec-ffmpeg
-    avformat-ffmpeg
-    avutil-ffmpeg
-    swscale-ffmpeg
-	avfilter-ffmpeg
-	avdevice-ffmpeg
+	avcodec
+    avformat
+    avutil
+    swscale
+	avfilter
+	avdevice
     pthread
 )
 

@@ -64,6 +64,8 @@ int UsbCameraOnDemandRTSPServer::StartServer() {
   char const* descriptionString
     = "Session streamed by \"testOnDemandRTSPServer\"";
 
+  OutPacketBuffer::maxSize= 2<<20;
+
   // Set up each of the possible streams that can be served by the
   // RTSP server.  Each such stream is implemented using a
   // "ServerMediaSession" object, plus one or more
