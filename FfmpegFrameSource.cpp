@@ -40,6 +40,8 @@ void FFmpegH264Source::FfmpegGetNextFrame()
     if (!m_capture.IsReady()) {
 #ifdef __linux__
         m_capture.Open("video4linux2", "/dev/video0", 640, 480, 30);
+#elif __APPLE__
+        m_capture.Open("avfoundation", "0", 640, 480, 30);
 #else
         m_capture.Open("dshow", "video=Integrated Camera", 640, 480, 30);
 #endif 
@@ -47,6 +49,10 @@ void FFmpegH264Source::FfmpegGetNextFrame()
     }
 
     AVFrame *rawFrame = m_capture.Capture();
+    if (rawFrame == nullptr) {
+        std::cout << "Capture failed, frame is null!" << std::endl;
+        return;
+    }
     
     AVPacket pkt;
     memset(&pkt, 0,sizeof(pkt));
@@ -76,6 +82,7 @@ void FFmpegH264Source::FfmpegGetNextFrame()
         fPresentationTime.tv_usec = 1000 * av_gettime_relative();
     }
 
+    av_frame_unref(rawFrame);
     FramedSource::afterGetting(this);
 
 }

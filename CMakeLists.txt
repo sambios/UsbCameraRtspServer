@@ -4,14 +4,16 @@ project(ffmegH264RtspServer)
 
 add_definitions(-D__STDC_CONSTANT_MACROS -std=c++11)
 
-#find_package(Ffmpeg REQUIRED)
-#message(STATUS "Ffmpeg library status:")
-#message(STATUS "   Version:${Ffmpeg_VERSION}")
-#message(STATUS "   Libs:${Ffmpeg_LIBS}")
-#message(STATUS "   Include:${Ffmpeg_INCLUDE_DIRS}")
 message(STATUS "Home is $ENV{HOME}")
 
-set(THIRD_PARTY_ROOT /home/hsyuan/work/third_party)
+if (NOT THIRD_PARTY_ROOT)
+    if (DEFINED ENV{THIRD_PARTY_ROOT})
+        set(THIRD_PARTY_ROOT $ENV{THIRD_PARTY_ROOT})
+    else()
+        set(THIRD_PARTY_ROOT $ENV{HOME}/main/third_party)
+    endif()
+endif()
+
 set(Live555_ROOT ${THIRD_PARTY_ROOT}/live555)
 
 if (CMAKE_SYSTEM_NAME MATCHES "Linux")

@@ -98,6 +98,18 @@ int UsbCameraOnDemandRTSPServer::StartServer() {
 
       announceStream(m_rtspServer, sms, streamName, input_device);
   }
+#elif __APPLE__
+  {
+    char const* streamName = "live";
+    char const* input_type = "avfoundation";
+    char const* input_device = "video=FaceTime HD Camera";
+
+    ServerMediaSession* sms = ServerMediaSession::createNew(env(), streamName, streamName, descriptionString);
+    sms->addSubsession(FfmpegH264LiveServerMediaSubsession::createNew(env(), input_type, input_device));
+    m_rtspServer->addServerMediaSession(sms);
+
+    announceStream(m_rtspServer, sms, streamName, input_device);
+  }
 #endif 
 
   env().taskScheduler().doEventLoop(); // does not return

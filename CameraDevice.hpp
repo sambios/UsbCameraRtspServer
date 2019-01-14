@@ -51,11 +51,13 @@ private:
     AVFormatContext *formatContext_;
     AVPacket *packetRaw_;
     AVCodecContext *codecContextRaw_;
-    AVFrame *frameYuyv422_, *frameYuyv422Watermark_;
+    AVFrame *frameYuyv422_;
+#ifdef USE_FFMPEG_DRAWTEXT
+    AVFrame *frameYuyv422Watermark_;
     AVFilterGraph *filterGraph_;
     AVFilterContext *filterContextSrc_;
     AVFilterContext *filterContextSink_;
-
+#endif
     bool isReady_;
 };
 

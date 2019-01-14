@@ -73,11 +73,13 @@ string GenerateLocalDateTimeString() {
 
 CameraDevice::CameraDevice() :
         isReady_(false),
+#ifdef USE_FFMPEG_DRAWTEXT
         filterGraph_(NULL),
         filterContextSrc_(NULL),
         filterContextSink_(NULL),
-        frameYuyv422_(NULL),
         frameYuyv422Watermark_(NULL),
+#endif
+        frameYuyv422_(NULL),
         codecContextRaw_(NULL),
         packetRaw_(NULL),
         formatContext_(NULL) {
@@ -87,6 +89,7 @@ CameraDevice::CameraDevice() :
     avdevice_register_all();
     avcodec_register_all();
     avfilter_register_all();
+    av_log_set_level(AV_LOG_DEBUG);
 }
 
 CameraDevice::~CameraDevice() {
@@ -189,8 +192,7 @@ bool CameraDevice::Open(const char *format, const char *device,
 
     // Create video frame structure
     frameYuyv422_ = av_frame_alloc();
-    frameYuyv422Watermark_ = av_frame_alloc();
-    if ((frameYuyv422_ == NULL) || (frameYuyv422Watermark_ == NULL)) {
+    if ((frameYuyv422_ == NULL)) {
         std::cout << "Cannot alloc frame";
         goto cleanup;
     }
@@ -198,6 +200,14 @@ bool CameraDevice::Open(const char *format, const char *device,
     frameYuyv422_->format = AV_PIX_FMT_YUYV422;
     frameYuyv422_->width = width;
     frameYuyv422_->height = height;
+
+#ifdef USE_FFMPEG_DRAWTEXT
+    frameYuyv422Watermark_ = av_frame_alloc();
+    if ((frameYuyv422Watermark_ == NULL)) {
+        std::cout << "Cannot alloc Watermark frame";
+        goto cleanup;
+    }
+
     frameYuyv422Watermark_->format = AV_PIX_FMT_YUYV422;
     frameYuyv422Watermark_->width = width;
     frameYuyv422Watermark_->height = height;
@@ -223,7 +233,7 @@ bool CameraDevice::Open(const char *format, const char *device,
         goto cleanup;
     }
 
-    snprintf(args, sizeof(args),
+     snprintf(args, sizeof(args),
              "video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
              width, height, AV_PIX_FMT_YUYV422, 1, fps, 1, 1
     );
@@ -260,6 +270,7 @@ bool CameraDevice::Open(const char *format, const char *device,
         goto cleanup;
     }
 
+#endif
     // Initializes video packet structure
     
     //packetRaw_ = av_packet_alloc();
@@ -273,10 +284,12 @@ bool CameraDevice::Open(const char *format, const char *device,
     return true;
 
 cleanup:
+#ifdef USE_FFMPEG_DRAWTEXT
     if (filterGraph_) {
         avfilter_graph_free(&filterGraph_);
         filterGraph_ = NULL;
     }
+#endif
 
     if (codecContextRaw_) {
         avcodec_close(codecContextRaw_);
@@ -301,10 +314,12 @@ cleanup:
         frameYuyv422_ = NULL;
     }
 
+#ifdef USE_FFMPEG_DRAWTEXT
     if (frameYuyv422Watermark_) {
         av_frame_free(&frameYuyv422Watermark_);
         frameYuyv422Watermark_ = NULL;
     }
+#endif
 
     return false;
 }
@@ -313,12 +328,12 @@ void CameraDevice::Close() {
 
     if (isReady_) {
         isReady_ = false;
-
+#ifdef USE_FFMPEG_DRAWTEXT
         if (filterGraph_) {
             avfilter_graph_free(&filterGraph_);
             filterGraph_ = NULL;
         }
-
+#endif
         if (codecContextRaw_) {
             avcodec_close(codecContextRaw_);
             avcodec_free_context(&codecContextRaw_);
@@ -341,11 +356,12 @@ void CameraDevice::Close() {
             av_frame_free(&frameYuyv422_);
             frameYuyv422_ = NULL;
         }
-
+#ifdef USE_FFMPEG_DRAWTEXT
         if (frameYuyv422Watermark_) {
             av_frame_free(&frameYuyv422Watermark_);
             frameYuyv422Watermark_ = NULL;
         }
+#endif
     }
 }
 
@@ -372,6 +388,8 @@ AVFrame* CameraDevice::Capture() {
     }
 
     frameYuyv422_->pts = av_frame_get_best_effort_timestamp(frameYuyv422_);
+
+#ifdef USE_FFMPEG_DRAWTEXT
     if (av_buffersrc_add_frame_flags(filterContextSrc_, frameYuyv422_, AV_BUFFERSRC_FLAG_KEEP_REF) < 0) {
         std::cout << "Cannot add frame to src buffer";
         return NULL;
@@ -383,8 +401,11 @@ AVFrame* CameraDevice::Capture() {
     }
 
     AVFrame* capFrame = av_frame_clone(frameYuyv422Watermark_);
-
     av_frame_unref(frameYuyv422Watermark_);
+#else
+    AVFrame *capFrame = av_frame_clone(frameYuyv422_);
+#endif
+
     av_frame_unref(frameYuyv422_);
     av_packet_unref(packetRaw_);
 
