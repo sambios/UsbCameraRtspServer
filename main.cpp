@@ -1,24 +1,43 @@
 #include "CameraDevice.hpp"
-//#include "opencv2/opencv.hpp"
 #include "UsbCameraOnDemandRTSPServer.h"
+#include "getopt.h"
 
 int main(int argc, char *argv[])
 {
-    /*CameraDevice dev;
-    dev.Open("dshow", "video=Integrated Camera", 640, 480, 30);
-    while (1) {
+    std::string h264file;
+    int ch = 0, option_index;
+    struct option long_options[] =
+            {
 
-        AVFrame *frame = dev.Capture();
-        cv::Mat image = avframe_to_cvmat(frame);
-        cv::imshow("test", image);
-        cv::waitKey(20);
-    }*/
+                    {"h264file", optional_argument, NULL, 0},
+                    {0,          0, 0,                    0},
+
+            };
+
+    while ((ch = getopt_long(argc, argv, "i:", long_options, &option_index)) != -1)
+    {
+
+        switch (ch)
+        {
+            case 0:
+                if (optarg) {
+                    if (option_index == 0) {
+                        h264file = optarg;
+                    }
+                }
+
+                break;
+            case 'i':
+                h264file = optarg;
+                break;
+        }
+    }
 
     UsbCameraOnDemandRTSPServer server;
 #ifdef _WIN32
-    server.SetH264File("c:\\hsyuan\\testfiles\\yanxi-1080p.264");
+    server.SetH264File(h264file);
 #else
-    server.SetH264File("~/testfiles/yanxi-720-2m.264");
+    server.SetH264File(h264file);
 #endif 
     server.StartServer();
     
