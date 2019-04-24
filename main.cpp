@@ -34,13 +34,8 @@ int main(int argc, char *argv[])
     }
 
     UsbCameraOnDemandRTSPServer server;
-#ifdef _WIN32
     server.SetH264File(h264file);
-#else
-    server.SetH264File(h264file);
-#endif 
     server.StartServer();
-    
 
     return 0;
 }

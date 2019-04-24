@@ -8,11 +8,11 @@ add_definitions(-D__STDC_CONSTANT_MACROS)
 
 message(STATUS "Home is $ENV{HOME}")
 
-if (NOT THIRD_PARTY_ROOT)
+if (NOT DEFINED THIRD_PARTY_ROOT)
     if (DEFINED ENV{THIRD_PARTY_ROOT})
         set(THIRD_PARTY_ROOT $ENV{THIRD_PARTY_ROOT})
     else ()
-        set(THIRD_PARTY_ROOT $ENV{HOME}/main/third_party)
+        set(THIRD_PARTY_ROOT $ENV{THIRD_PARTY_ROOT}/main/third_party)
     endif ()
 endif ()
 
@@ -26,11 +26,13 @@ elseif (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     set(IS_MAC 1)
 endif ()
 
+message(STATUS "live555_root=${Live555_ROOT}")
 
 include_directories(${Live555_ROOT}/BasicUsageEnvironment/include
         ${Live555_ROOT}/UsageEnvironment/include
         ${Live555_ROOT}/liveMedia/include
         ${Live555_ROOT}/groupsock/include
+        ${Live555_ROOT}/include
         /usr/local/include
         )
 
