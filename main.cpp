@@ -32,7 +32,12 @@ int main(int argc, char *argv[])
                 break;
         }
     }
-
+    
+    if (h264file.empty()) {
+        printf("Usage: -i [filepath] or --h264file=[filepath]\n");
+        return -1;
+    }
+    
     UsbCameraOnDemandRTSPServer server;
     server.SetH264File(h264file);
     server.StartServer();
